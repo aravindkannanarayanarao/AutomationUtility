@@ -13,11 +13,19 @@ class Program
         // Appium 1
         List<Dictionary<string, string>> projects = new List<Dictionary<string, string>>
         {
-        //new Dictionary<string, string> { { "ProjectName", "maui-chat-tests" }, { "SampleName", "SfChatSample" }, { "ApplicationID", "com.companyname.sfchatsample" }, { "Platform", "UITests.Android" }, { "EmulatorCommand", "Pixel_5_API_33" } },
-        //new Dictionary<string, string> { { "ProjectName", "BusyIndicator-MAUI-tests" }, { "SampleName", "SfBusyIndicatorSample" }, { "ApplicationID", "com.companyname.SfBusyIndicatorSample" }, { "Platform", "UITests.Android" }, { "EmulatorCommand", "Pixel_2_XL_API_28" } },
-        
-        new Dictionary<string, string> { { "ProjectName", "maui-chat-tests" }, { "SampleName", "SfChatSample" }, { "ApplicationID", "com.companyname.sfchatsample" }, { "Platform", "UITests.iOS" }, { "EmulatorCommand", "A345178C-6D96-4B7E-83BD-266E3B81B0F7" } },
-        new Dictionary<string, string> { { "ProjectName", "BusyIndicator-MAUI-tests" }, { "SampleName", "SfBusyIndicatorSample" }, { "ApplicationID", "com.companyname.SfBusyIndicatorSample" }, { "Platform", "UITests.iOS" }, { "EmulatorCommand", "A345178C-6D96-4B7E-83BD-266E3B81B0F7" } },
+            new Dictionary<string, string> { { "ProjectName", "maui-scheduler-tests" }, { "SampleName", "MAUISfSchedulerAgenda" }, { "ApplicationID", "com.companyname.mauisfscheduleragenda" }, { "Platform", "UITests.Android" }, { "EmulatorCommand", "Pixel_2_XL" } },
+            new Dictionary<string, string> { { "ProjectName", "maui-scheduler-tests" }, { "SampleName", "SfSchedulerAgendaView" }, { "ApplicationID", "com.companyname.sfscheduleragendaview" }, { "Platform", "UITests.Android" }, { "EmulatorCommand", "Pixel_2_XL" } },
+            new Dictionary<string, string> { { "ProjectName", "maui-scheduler-tests" }, { "SampleName", "SfSchedulerCalendarTypes" }, { "ApplicationID", "com.companyname.sfschedulercalendartypes" }, { "Platform", "UITests.Android" }, { "EmulatorCommand", "Pixel_2_XL" } },
+            new Dictionary<string, string> { { "ProjectName", "maui-scheduler-tests" }, { "SampleName", "AppointmentTemplateSelector" }, { "ApplicationID", "com.companyname.appointmenttemplateselector" }, { "Platform", "UITests.Android" }, { "EmulatorCommand", "Pixel_2_XL" } },
+            new Dictionary<string, string> { { "ProjectName", "maui-scheduler-tests" }, { "SampleName", "SfSchedulerDayView" }, { "ApplicationID", "com.companyname.sfschedulerdayview" }, { "Platform", "UITests.Android" }, { "EmulatorCommand", "Pixel_2_XL" } },
+            new Dictionary<string, string> { { "ProjectName", "maui-scheduler-tests" }, { "SampleName", "SfSchedulerEvents" }, { "ApplicationID", "com.companyname.sfschedulerevents" }, { "Platform", "UITests.Android" }, { "EmulatorCommand", "Pixel_2_XL" } },
+            new Dictionary<string, string> { { "ProjectName", "maui-scheduler-tests" }, { "SampleName", "SfSchedulerHeaderView" }, { "ApplicationID", "com.companyname.sfschedulerheaderview" }, { "Platform", "UITests.Android" }, { "EmulatorCommand", "Pixel_2_XL" } },
+            new Dictionary<string, string> { { "ProjectName", "maui-scheduler-tests" }, { "SampleName", "SfschedulerRecurrenceRule" }, { "ApplicationID", "com.companyname.sfschedulerrecurrencerule" }, { "Platform", "UITests.Android" }, { "EmulatorCommand", "Pixel_2_XL" } },
+            new Dictionary<string, string> { { "ProjectName", "maui-scheduler-tests" }, { "SampleName", "SfSchedulerShowAllowedViews" }, { "ApplicationID", "com.companyname.sfschedulershowallowedviews" }, { "Platform", "UITests.Android" }, { "EmulatorCommand", "Pixel_2_XL" } },
+            new Dictionary<string, string> { { "ProjectName", "maui-scheduler-tests" }, { "SampleName", "SfSchedulerSpecialTimeRegion" }, { "ApplicationID", "com.companyname.sfschedulerspecialtimeregion" }, { "Platform", "UITests.Android" }, { "EmulatorCommand", "Pixel_2_XL" } },
+            new Dictionary<string, string> { { "ProjectName", "maui-scheduler-tests" }, { "SampleName", "SfSchedulerTimelineView" }, { "ApplicationID", "com.companyname.sfschedulertimelineview" }, { "Platform", "UITests.Android" }, { "EmulatorCommand", "Pixel_2_XL" } },
+            new Dictionary<string, string> { { "ProjectName", "maui-scheduler-tests" }, { "SampleName", "SfSchedulerTimeslot" }, { "ApplicationID", "com.companyname.sfschedulertimeslot" }, { "Platform", "UITests.Android" }, { "EmulatorCommand", "Pixel_2_XL" } },
+            new Dictionary<string, string> { { "ProjectName", "maui-scheduler-tests" }, { "SampleName", "SfShedulerMonthView" }, { "ApplicationID", "com.companyname.sfshedulermonthview" }, { "Platform", "UITests.Android" }, { "EmulatorCommand", "Pixel_2_XL" } },
         };
 
         foreach (var project in projects)
@@ -25,6 +33,10 @@ class Program
             Console.WriteLine($"Running UI tests for {project["ProjectName"]}...");
             RunUITests(project, documentFolder);
         }
+
+    }
+    public static void SimulatorDeviceBoot(Dictionary<string, string> project)
+    {
 
     }
     static void RunUITests(Dictionary<string, string> project, string documentFolder)
@@ -39,16 +51,16 @@ class Program
             string installCommand = $"adb install {appPath}/bin/Release/net9.0-android/publish/{project["ApplicationID"]}-Signed.apk";
             string TestRun = $"dotnet test {testPath}";
             Console.WriteLine($"Running commands for {project["ProjectName"]}...");
-            if(project["EmulatorCommand"] == "Pixel_5_API_33")
+
+            string platform = project["Platform"];
+
+            if (platform.Contains("Android"))
             {
-            Console.WriteLine($"Starting emulator : {project["EmulatorCommand"]}...");
-            AndroidTool.BootDevice(project["EmulatorCommand"]);
+                AndroidTool.HandleAndroidLaunch(emulator);
             }
-            else if(project["EmulatorCommand"] == "Pixel_2_XL_API_28")
+            else if (platform.Contains("iOS"))
             {
-                AndroidTool.ShutdownDeviceCompletely("Pixel_5_API_33");
-                Console.WriteLine($"Starting emulator : {project["EmulatorCommand"]}...");
-                AndroidTool.BootDevice(project["EmulatorCommand"]);
+                iOSTool.HandleiOSLaunch(emulator);
             }
             Console.WriteLine($"Starting {project["SampleName"]} build and publish");
             CommondExcecute.ExecuteCommand($"cd {appPath} && {publishCommand}");
@@ -58,15 +70,15 @@ class Program
 
             Console.WriteLine($"UITest started for project : {project["SampleName"]} Sample : {project["SampleName"]} Platform : {project["Platform"]} ");
             CommondExcecute.ExecuteCommand(TestRun);
-            if(project["EmulatorCommand"] == "Pixel_5_API_33")
+            if (project["EmulatorCommand"] == "Pixel_5_API_33")
             {
-            Console.WriteLine($"Closing emulator");
-            AndroidTool.ShutdownDevice(project["EmulatorCommand"]);
+                Console.WriteLine($"Closing emulator");
+                AndroidTool.ShutdownDevice(project["EmulatorCommand"]);
             }
-            else if(project["EmulatorCommand"] == "Pixel_2_XL_API_28")
+            else if (project["EmulatorCommand"] == "Pixel_2_XL_API_28")
             {
-            Console.WriteLine($"Closing emulator");
-            AndroidTool.ShutdownDevice(project["EmulatorCommand"]);
+                Console.WriteLine($"Closing emulator");
+                AndroidTool.ShutdownDevice(project["EmulatorCommand"]);
             }
 
         }
@@ -78,6 +90,17 @@ class Program
             string appPath = $"{documentFolder}/Appium/{project["ProjectName"]}/UITest/Appium/{project["SampleName"]}/{project["SampleName"]}";
             string testPath = $"{documentFolder}/Appium/{project["ProjectName"]}/UITest/Appium/{project["SampleName"]}/{project["Platform"]}";
             string TestRun = $"dotnet test {testPath}";
+
+            string platform = project["Platform"];
+
+            if (platform.Contains("Android"))
+            {
+                AndroidTool.HandleAndroidLaunch(emulator);
+            }
+            else if (platform.Contains("iOS"))
+            {
+                iOSTool.HandleiOSLaunch(iphone13promax);
+            }
             Console.WriteLine($"Running commands for {project["ProjectName"]}...");
 
             Console.WriteLine($"Starting simulator : {project["EmulatorCommand"]}...");

@@ -183,25 +183,25 @@ namespace MAUIAndroidUIAutomationUtility.AndroidTools
         {
             try
             {
-            if (!Adb.CheckAdbInstalled())
-            {
-                throw new Exception("ADB is not installed or not in PATH. Please install ADB and ensure it is in your PATH.");
-            }
+                if (!Adb.CheckAdbInstalled())
+                {
+                    throw new Exception("ADB is not installed or not in PATH. Please install ADB and ensure it is in your PATH.");
+                }
 
-            if (string.IsNullOrEmpty(avdName))
-            {
-                throw new ArgumentNullException(nameof(avdName), "Error: Device name is missing or invalid.");
-            }
+                if (string.IsNullOrEmpty(avdName))
+                {
+                    throw new ArgumentNullException(nameof(avdName), "Error: Device name is missing or invalid.");
+                }
 
-            // Kill all running emulator instances
+                // Kill all running emulator instances
 
-            CommondExcecute.ExecuteCommand($"adb -s {avdName} emu kill");
+                CommondExcecute.ExecuteCommand($"adb -s {avdName} emu kill");
 
-            Console.WriteLine(avdName+" emulator instances have been shut down.");
+                Console.WriteLine(avdName + " emulator instances have been shut down.");
             }
             catch (Exception ex)
             {
-            throw new Exception($"Error shutting down the device:"+avdName+" {ex.Message}");
+                throw new Exception($"Error shutting down the device:" + avdName + " {ex.Message}");
             }
         }
 
@@ -209,28 +209,28 @@ namespace MAUIAndroidUIAutomationUtility.AndroidTools
         {
             try
             {
-            if (!Adb.CheckAdbInstalled())
-            {
-                throw new Exception("ADB is not installed or not in PATH. Please install ADB and ensure it is in your PATH.");
-            }
+                if (!Adb.CheckAdbInstalled())
+                {
+                    throw new Exception("ADB is not installed or not in PATH. Please install ADB and ensure it is in your PATH.");
+                }
 
-            if (string.IsNullOrEmpty(avdName))
-            {
-                throw new ArgumentNullException(nameof(avdName), "Error: Device name is missing or invalid.");
-            }
+                if (string.IsNullOrEmpty(avdName))
+                {
+                    throw new ArgumentNullException(nameof(avdName), "Error: Device name is missing or invalid.");
+                }
 
-            // Kill all running emulator instances
+                // Kill all running emulator instances
 
-            CommondExcecute.ExecuteCommand($"adb -s {avdName} emu kill");
-            CommondExcecute.ExecuteCommand($"adb emu kill");
-            CommondExcecute.ExecuteCommand("adb kill-server");
-            
+                CommondExcecute.ExecuteCommand($"adb -s {avdName} emu kill");
+                CommondExcecute.ExecuteCommand($"adb emu kill");
+                CommondExcecute.ExecuteCommand("adb kill-server");
 
-            Console.WriteLine("All emulator instances have been shut down.");
+
+                Console.WriteLine("All emulator instances have been shut down.");
             }
             catch (Exception ex)
             {
-            throw new Exception($"Error shutting down the device: {ex.Message}");
+                throw new Exception($"Error shutting down the device: {ex.Message}");
             }
         }
 
@@ -277,6 +277,95 @@ namespace MAUIAndroidUIAutomationUtility.AndroidTools
             Console.WriteLine("Emulator booted successfully!");
 
         }
+        public static void HandleAndroidLaunch(string avdName)
+        {
+            string deviceId = GetAndroidDeviceId(avdName);
+
+            if (!string.IsNullOrEmpty(deviceId) && IsAndroidDeviceBooted(deviceId))
+            {
+                Console.WriteLine("✅ Android emulator already running and booted.");
+            }
+            else
+            {
+                Console.WriteLine("🚀 Launching Android emulator...");
+                RunCommand($"emulator -avd {avdName}", true);
+                Thread.Sleep(5000);
+                WaitForAndroidBoot(avdName);
+            }
+        }
+
+        public static void WaitForAndroidBoot(string deviceName)
+        {
+            Console.WriteLine("⏳ Checking Android boot status...");
+            string deviceId = GetAndroidDeviceId(deviceName);
+
+            if (IsAndroidDeviceBooted(deviceId))
+            {
+                Console.WriteLine("✅ Android emulator is already booted.");
+                return;
+            }
+
+            Console.WriteLine("⌛ Waiting for Android emulator to fully boot...");
+            while (!IsAndroidDeviceBooted(deviceId))
+            {
+                Thread.Sleep(5000);
+            }
+
+            Console.WriteLine("✅ Android emulator is ready!");
+        }
+
+
+        public static string GetAndroidDeviceId(string avdName)
+        {
+            var process = new Process
+            {
+                StartInfo = new ProcessStartInfo
+                {
+                    FileName = "adb",
+                    Arguments = "devices",
+                    RedirectStandardOutput = true,
+                    UseShellExecute = false,
+                    CreateNoWindow = true
+                }
+            };
+            process.Start();
+            string output = process.StandardOutput.ReadToEnd();
+            process.WaitForExit();
+
+            // Assumes only one emulator running, otherwise you'll need better mapping
+            foreach (var line in output.Split('\n'))
+            {
+                if (line.Contains("emulator-"))
+                {
+                    return line.Split('\t')[0];
+                }
+            }
+            return string.Empty;
+        }
+
+        static bool IsAndroidDeviceBooted(string deviceId)
+        {
+            if (string.IsNullOrEmpty(deviceId)) return false;
+
+            var process = new Process
+            {
+                StartInfo = new ProcessStartInfo
+                {
+                    FileName = "adb",
+                    Arguments = $"-s {deviceId} shell getprop sys.boot_completed",
+                    RedirectStandardOutput = true,
+                    UseShellExecute = false,
+                    CreateNoWindow = true
+                }
+            };
+
+            process.Start();
+            string output = process.StandardOutput.ReadToEnd().Trim();
+            process.WaitForExit();
+
+            return output == "1";
+        }
+
 
     }
 }
