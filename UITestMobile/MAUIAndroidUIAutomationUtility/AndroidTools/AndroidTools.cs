@@ -1,12 +1,12 @@
 ﻿using MAUIAndroidUIAutomationUtility.Helper;
-using NuGet;
 using System.Diagnostics;
 
 namespace MAUIAndroidUIAutomationUtility.AndroidTools
 {
     public static class AndroidTool
     {
-        static string AndroidHome ="/Users/aravindkann/Library/Android/sdk";
+        public static string ANDROID_HOME = "/Users/aravindkann/Library/Android/sdk";
+        public static string ANDROID_PLATFORMTOOL = "/Users/aravindkann/Library/Android/sdk/platform-tools";
         public static void InstallApp(string deviceSerial, string appPath)
         {
             try
@@ -27,7 +27,7 @@ namespace MAUIAndroidUIAutomationUtility.AndroidTools
                 }
 
                 // Execute the adb install command
-                CommondExcecute.ExecuteCommand($"adb -s {deviceSerial} install \"{appPath}\"");
+                CommondExcecute.ExecuteCommand($"{ANDROID_PLATFORMTOOL}/adb -s {deviceSerial} install \"{appPath}\"");
             }
             catch (Exception ex)
             {
@@ -50,7 +50,7 @@ namespace MAUIAndroidUIAutomationUtility.AndroidTools
 
                 var packages = new List<string>();
 
-                string result = $"adb -s {deviceSerial} shell pm list packages";
+                string result = $"{ANDROID_PLATFORMTOOL}/adb -s {deviceSerial} shell pm list packages";
                 CommondExcecute.ExecuteCommand(result);
 
                 string[] lines = result.Split(['\r', '\n'], StringSplitOptions.RemoveEmptyEntries);
@@ -98,7 +98,7 @@ namespace MAUIAndroidUIAutomationUtility.AndroidTools
                 }
 
                 var devices = new List<AdbDevice>();
-                string result = "adb devices -l";
+                string result = "{ANDROID_PLATFORMTOOL}/adb devices -l";
                 CommondExcecute.ExecuteCommand(result);
 
                 string[] lines = result.Split(['\r', '\n'], StringSplitOptions.RemoveEmptyEntries);
@@ -153,7 +153,7 @@ namespace MAUIAndroidUIAutomationUtility.AndroidTools
                 {
                     throw new ArgumentNullException(nameof(avdName), "Error: Device name is missing or invalid.");
                 }
-                string emulatorCommand = $"{AndroidHome}/emulator/emulator -avd {avdName}";
+                string emulatorCommand = $"{ANDROID_HOME}/emulator/emulator -avd {avdName}";
                 Process process = new Process()
 
                 {
@@ -197,7 +197,7 @@ namespace MAUIAndroidUIAutomationUtility.AndroidTools
 
             // Kill all running emulator instances
 
-            CommondExcecute.ExecuteCommand($"adb -s {avdName} emu kill");
+            CommondExcecute.ExecuteCommand($"{ANDROID_PLATFORMTOOL}/adb -s {avdName} emu kill");
 
             Console.WriteLine(avdName+" emulator instances have been shut down.");
             }
@@ -223,9 +223,9 @@ namespace MAUIAndroidUIAutomationUtility.AndroidTools
 
             // Kill all running emulator instances
 
-            CommondExcecute.ExecuteCommand($"adb -s {avdName} emu kill");
-            CommondExcecute.ExecuteCommand($"adb emu kill");
-            CommondExcecute.ExecuteCommand("adb kill-server");
+            CommondExcecute.ExecuteCommand($"{ANDROID_PLATFORMTOOL}/adb -s {avdName} emu kill");
+            CommondExcecute.ExecuteCommand($"{ANDROID_PLATFORMTOOL}/adb emu kill");
+            CommondExcecute.ExecuteCommand("{ANDROID_PLATFORMTOOL}/adb kill-server");
             
 
             Console.WriteLine("All emulator instances have been shut down.");
@@ -259,7 +259,7 @@ namespace MAUIAndroidUIAutomationUtility.AndroidTools
                     {
                         FileName = "/bin/bash",
 
-                        Arguments = "-c \"adb shell getprop sys.boot_completed\"",
+                        Arguments = $"-c \"{ANDROID_PLATFORMTOOL}/adb shell getprop sys.boot_completed\"",
 
                         RedirectStandardOutput = true,
 
@@ -272,7 +272,7 @@ namespace MAUIAndroidUIAutomationUtility.AndroidTools
                 process.Start();
                 string output = process.StandardOutput.ReadToEnd().Trim();
                 process.WaitForExit();
-                if (output == "1" || output.IsEmpty()) break;
+                if (output == "1") break;
                 Thread.Sleep(5000); // Wait for 5 seconds before checking again
             }
 
