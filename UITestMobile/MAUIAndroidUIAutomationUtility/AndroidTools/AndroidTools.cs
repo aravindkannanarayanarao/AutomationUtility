@@ -277,6 +277,95 @@ namespace MAUIAndroidUIAutomationUtility.AndroidTools
             Console.WriteLine("Emulator booted successfully!");
 
         }
+        public static void HandleAndroidLaunch(string avdName)
+        {
+            string deviceId = GetAndroidDeviceId(avdName);
+
+            if (!string.IsNullOrEmpty(deviceId) && IsAndroidDeviceBooted(deviceId))
+            {
+                Console.WriteLine("✅ Android emulator already running and booted.");
+            }
+            else
+            {
+                Console.WriteLine("🚀 Launching Android emulator...");
+                CommondExcecute.ExecuteCommand($"emulator -avd {avdName}");
+                Thread.Sleep(5000);
+                WaitForAndroidBoot(avdName);
+            }
+        }
+
+        public static void WaitForAndroidBoot(string deviceName)
+        {
+            Console.WriteLine("⏳ Checking Android boot status...");
+            string deviceId = GetAndroidDeviceId(deviceName);
+
+            if (IsAndroidDeviceBooted(deviceId))
+            {
+                Console.WriteLine("✅ Android emulator is already booted.");
+                return;
+            }
+
+            Console.WriteLine("⌛ Waiting for Android emulator to fully boot...");
+            while (!IsAndroidDeviceBooted(deviceId))
+            {
+                Thread.Sleep(2000);
+                break;
+            }
+
+            Console.WriteLine("✅ Android emulator is ready!");
+        }
+
+
+        public static string GetAndroidDeviceId(string avdName)
+        {
+            var process = new Process
+            {
+                StartInfo = new ProcessStartInfo
+                {
+                    FileName = "adb",
+                    Arguments = "devices",
+                    RedirectStandardOutput = true,
+                    UseShellExecute = false,
+                    CreateNoWindow = true
+                }
+            };
+            process.Start();
+            string output = process.StandardOutput.ReadToEnd();
+            process.WaitForExit();
+
+            // Assumes only one emulator running, otherwise you'll need better mapping
+            foreach (var line in output.Split('\n'))
+            {
+                if (line.Contains("emulator-"))
+                {
+                    return line.Split('\t')[0];
+                }
+            }
+            return string.Empty;
+        }
+
+        static bool IsAndroidDeviceBooted(string deviceId)
+        {
+            if (string.IsNullOrEmpty(deviceId)) return false;
+
+            var process = new Process
+            {
+                StartInfo = new ProcessStartInfo
+                {
+                    FileName = "adb",
+                    Arguments = $"-s {deviceId} shell getprop sys.boot_completed",
+                    RedirectStandardOutput = true,
+                    UseShellExecute = false,
+                    CreateNoWindow = true
+                }
+            };
+
+            process.Start();
+            string output = process.StandardOutput.ReadToEnd().Trim();
+            process.WaitForExit();
+
+            return output == "1";
+        }
 
     }
 }

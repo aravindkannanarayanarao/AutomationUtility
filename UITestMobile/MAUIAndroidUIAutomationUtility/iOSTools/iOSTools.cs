@@ -116,6 +116,52 @@ namespace MAUIAndroidUIAutomationUtility.iOSTools
             }
         }
 
+        public static void WaitForiOSBoot(string deviceId)
+        {
+            Console.WriteLine("⏳ Waiting for iOS simulator to fully boot...");
+            while (!IsiOSSimulatorBooted(deviceId))
+            {
+                Thread.Sleep(5000);
+            }
+            Console.WriteLine("✅ iOS simulator is ready!");
+        }
+        public static void HandleiOSLaunch(string simId)
+        {
+            if (IsiOSSimulatorBooted(simId))
+            {
+                Console.WriteLine("✅ iOS simulator already running and booted.");
+            }
+            else
+            {
+                Console.WriteLine("🚀 Launching iOS simulator...");
+                CommondExcecute.ExecuteCommand($"xcrun simctl boot {simId}");
+                CommondExcecute.ExecuteCommand("open -a Simulator");
+                Thread.Sleep(5000);
+                WaitForiOSBoot(simId);
+            }
+        }
+
+        public static bool IsiOSSimulatorBooted(string deviceId)
+        {
+            var process = new Process
+            {
+                StartInfo = new ProcessStartInfo
+                {
+                    FileName = "/bin/bash",
+                    Arguments = $"-c \"xcrun simctl list devices | grep {deviceId}\"",
+                    RedirectStandardOutput = true,
+                    UseShellExecute = false,
+                    CreateNoWindow = true
+                }
+            };
+
+            process.Start();
+            string output = process.StandardOutput.ReadToEnd();
+            process.WaitForExit();
+
+            return output.Contains("Booted");
+        }
+
     }
 }
 
